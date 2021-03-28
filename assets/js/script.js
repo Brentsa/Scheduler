@@ -42,7 +42,7 @@ function displayEventBlocks(){
         }
 
         //Give the event body a starting paragraph holder
-        eventBody.append($("<p>").addClass("textarea"));
+        eventBody.append($("<p>").addClass("textarea").text(events[hour]));
 
         //Event save button
         eventButton = $("<div>").addClass("col-1 saveBtn d-flex align-items-center justify-content-center");
@@ -55,16 +55,29 @@ function displayEventBlocks(){
 }
 
 //Save the events 
-function saveEvent(event){
-    
+function saveEvent(text, index){
+    events[index] = text;
+    localStorage.setItem("events", JSON.stringify(events));
+    console.log(events);
 }
 
 //Load the events
 function loadEvents(){
+
+    var storedEvents = JSON.parse(localStorage.getItem("events"));
+    
     for(var i = 0; i < 9; i++){
-        events.push("");
+        if(!storedEvents){
+            events.push("");
+        }
+        else{
+            events[i] = storedEvents[i]; 
+        }
     }
+
+    console.log(events);
 }
+   
 
 //Click on a block to change the event and save it
 eventContainerEl.on("click", ".description", function(event){
@@ -96,11 +109,10 @@ eventContainerEl.on("click", ".saveBtn", function(event){
     var timeBlockEl = $(this).closest(".time-block");
     var eventText = timeBlockEl.find(".textarea").text().trim();
     var eventIndex = timeBlockEl.index();
-    console.log(eventText);
-    console.log(eventIndex);
+
+    saveEvent(eventText, eventIndex);
 });
 
 loadEvents();
 displayDate();
 displayEventBlocks();
-console.log(events);
