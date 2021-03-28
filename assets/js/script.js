@@ -5,6 +5,9 @@ var currentDateEl = $("#currentDay");
 //Array of events for saving and loading
 var events = [];
 
+//Variable used to determine if we can reload the app if the user is outside of editing
+var bEventOpen = false;
+
 //Display the current day at the top of the counter.
 function displayDate(){
     var today = dayjs().format("dddd, MMMM D, YYYY");
@@ -13,6 +16,9 @@ function displayDate(){
 
 //Display time blocks for standard business hours
 function displayEventBlocks(){
+
+    //reset the event container
+    eventContainerEl.text("");
 
     //Create an event block for every hour of standard business hours
     for(var hour = 0; hour < 9; hour++){
@@ -42,10 +48,6 @@ function displayEventBlocks(){
         }
         
         //Give the event body a starting paragraph holder
-        // var eventRow = $("<div>").addClass("row p-0");
-        // eventRow.append($("<p>").addClass("textarea").text(events[hour]));
-        // eventBody.append(eventRow);
-
         eventBody.append($("<p>").addClass("textarea").text(events[hour]));
 
         
@@ -63,7 +65,6 @@ function displayEventBlocks(){
 function saveEvent(text, index){
     events[index] = text;
     localStorage.setItem("events", JSON.stringify(events));
-    console.log(events);
 }
 
 //Load the events
@@ -71,6 +72,7 @@ function loadEvents(){
 
     var storedEvents = JSON.parse(localStorage.getItem("events"));
     
+    //if there are saved events then we store them back in our events array
     for(var i = 0; i < 9; i++){
         if(!storedEvents){
             events.push("");
@@ -79,10 +81,14 @@ function loadEvents(){
             events[i] = storedEvents[i]; 
         }
     }
-
-    console.log(events);
 }
-   
+
+//Main function to load the app and run it's features
+function runApplication(){
+    loadEvents();
+    displayDate();
+    displayEventBlocks();
+}
 
 //Click on a block to change the event and save it
 eventContainerEl.on("click", ".description", function(event){
@@ -94,8 +100,12 @@ eventContainerEl.on("click", ".description", function(event){
     var textAreaEl = $("<textarea>").addClass("textarea").val(startingText);
     $(this).html(textAreaEl);
     textAreaEl.trigger("focus");
+
+    //Sets event open to true so we know if we can reload the app every min
+    bEventOpen = true;
 });
 
+//Execute when clicking outside of an event description
 eventContainerEl.on("blur", ".description", function(event){
     
     //Get the text from the textarea
@@ -108,16 +118,29 @@ eventContainerEl.on("blur", ".description", function(event){
     var pAreaEl = $("<p>").addClass("textarea");
     pAreaEl.text(text);
     $(this).html(pAreaEl);
+
+    //Sets event open to true so we know if we can reload the app every min
+    bEventOpen = false;
 });
 
+//Execute when the save button is clicked
 eventContainerEl.on("click", ".saveBtn", function(event){
+
+    //Traverse to the parent time-block
     var timeBlockEl = $(this).closest(".time-block");
+
+    //Get the event blocks text and index then save them
     var eventText = timeBlockEl.find(".textarea").text().trim();
     var eventIndex = timeBlockEl.index();
-
     saveEvent(eventText, eventIndex);
 });
 
-loadEvents();
-displayDate();
-displayEventBlocks();
+//Start the application on website open
+runApplication();
+
+//Reload the blocks every 1 min if there isnt an open event
+setInterval(function(){
+    if(!bEventOpen){
+        displayEventBlocks();
+    }
+}, 1000 * 60);
