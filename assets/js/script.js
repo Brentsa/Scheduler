@@ -22,12 +22,12 @@ function displayEventBlocks(){
         var today = dayjs("01-01-2021").hour(workHour).format("ha");
 
         //Create an event container to hold time, body, and button section
-        eventBlock = $("<div>").addClass("row my-1 time-block");
+        eventBlock = $("<div>").addClass("row time-block");
 
         //Work hour element
         eventTime = $("<div>").addClass("col-1 hour pt-3").text(today);
 
-        //Event to list 
+        //Event description
         eventBody = $("<div>").addClass("col-10 p-0 description");
 
         //Color code the time blocks: past present or future
@@ -40,10 +40,15 @@ function displayEventBlocks(){
         else{
             eventBody.addClass("present");
         }
-
+        
         //Give the event body a starting paragraph holder
+        // var eventRow = $("<div>").addClass("row p-0");
+        // eventRow.append($("<p>").addClass("textarea").text(events[hour]));
+        // eventBody.append(eventRow);
+
         eventBody.append($("<p>").addClass("textarea").text(events[hour]));
 
+        
         //Event save button
         eventButton = $("<div>").addClass("col-1 saveBtn d-flex align-items-center justify-content-center");
         eventButton.html("<i class='far fa-save display-6'></i>");
